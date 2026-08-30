@@ -1,0 +1,5 @@
+package com.example.svaneya_admin_app
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
