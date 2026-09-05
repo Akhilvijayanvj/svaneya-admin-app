@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:intl/intl.dart';
 import 'add_product.dart';
 
 class OverviewScreen extends StatefulWidget {
@@ -16,10 +15,9 @@ class _OverviewScreenState extends State<OverviewScreen> {
   bool _isLoading = true;
   double _totalRevenue = 0;
   int _totalOrders = 0;
+  int _pendingOrders = 0;
   int _totalProducts = 0;
-  
-  List<dynamic> _recentOrders = [];
-  List<dynamic> _alerts = [];
+  int _alertCount = 0;
 
   @override
   void initState() {
@@ -29,22 +27,24 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
   Future<void> _fetchDashboardData() async {
     try {
-      final ordersRes = await supabase.from('orders').select().order('created_at', ascending: false);
+      final ordersRes = await supabase.from('orders').select();
       final productsRes = await supabase.from('products').select('id');
-      final alertsRes = await supabase.from('admin_notifications').select().eq('is_read', false).order('created_at', ascending: false);
+      final alertsRes = await supabase.from('admin_notifications').select('id', const FetchOptions(count: CountOption.exact)).eq('is_read', false);
       
       double revenue = 0;
+      int pending = 0;
       for (var o in ordersRes) {
         revenue += (o['total_amount'] as num).toDouble();
+        if (o['status'] == 'pending') pending++;
       }
       
       if (mounted) {
         setState(() {
           _totalRevenue = revenue;
           _totalOrders = ordersRes.length;
+          _pendingOrders = pending;
           _totalProducts = productsRes.length;
-          _recentOrders = ordersRes.take(3).toList();
-          _alerts = alertsRes;
+          _alertCount = alertsRes.count ?? 0;
           _isLoading = false;
         });
       }
@@ -53,171 +53,197 @@ class _OverviewScreenState extends State<OverviewScreen> {
     }
   }
 
-  Future<void> _dismissAlert(String id) async {
-    await supabase.from('admin_notifications').update({'is_read': true}).eq('id', id);
-    _fetchDashboardData();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(title: const Text('Store Dashboard'), centerTitle: true, surfaceTintColor: Colors.transparent),
+      backgroundColor: const Color(0xFFF8F9FA),
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
         : RefreshIndicator(
             onRefresh: _fetchDashboardData,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // Metrics
-                _buildStatCard('Total Revenue', '₹${_totalRevenue.toStringAsFixed(2)}', LucideIcons.wallet, Colors.green),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(child: _buildStatCard('Orders', '$_totalOrders', LucideIcons.shoppingBag, Colors.blue)),
-                    const SizedBox(width: 12),
-                    Expanded(child: _buildStatCard('Products', '$_totalProducts', LucideIcons.package, Colors.orange)),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                
-                // Store Management Quick Actions
-                const Text('Store Management', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 2.5,
-                  children: [
-                    _buildQuickAction('Add Product', LucideIcons.plusCircle, Colors.pink, () async {
-                      await Navigator.push(context, MaterialPageRoute(builder: (_) => const AddProductScreen()));
-                      _fetchDashboardData();
-                    }),
-                    _buildQuickAction('All Products', LucideIcons.package, Colors.indigo, () => widget.onNavigate?.call(1)),
-                    _buildQuickAction('All Orders', LucideIcons.shoppingCart, Colors.blue, () => widget.onNavigate?.call(2)),
-                    _buildQuickAction('Settings', LucideIcons.settings, Colors.grey.shade800, () => widget.onNavigate?.call(3)),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Customer Alerts
-                if (_alerts.isNotEmpty) ...[
+            child: SafeArea(
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  // Top Header
+                  Row(
+                    children: [
+                      const CircleAvatar(
+                        radius: 20,
+                        backgroundImage: NetworkImage('https://ui-avatars.com/api/?name=Admin&background=1E293B&color=BFFF07'),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Hi, Admin 👋', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            Text('Svaneya Store', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade300)),
+                        child: const Icon(LucideIcons.bell, size: 20),
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Dark Revenue Card
                   Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.orange.shade200)),
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [BoxShadow(color: const Color(0xFF1E293B).withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(Icons.circle, size: 12, color: Colors.orange.shade600),
-                            const SizedBox(width: 8),
-                            Text('Customer Alerts', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange.shade900)),
+                            Text("Today's Revenue", style: TextStyle(color: Colors.grey.shade400, fontSize: 14)),
+                            const Icon(LucideIcons.barChart2, color: Color(0xFFBFFF07), size: 24),
                           ],
                         ),
+                        const SizedBox(height: 8),
+                        Text('₹${_totalRevenue.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        Text('${_alerts.length} recent changes require your attention', style: TextStyle(color: Colors.orange.shade700, fontSize: 13)),
-                        const SizedBox(height: 12),
-                        ..._alerts.map((a) => Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.orange.shade100)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(a['title'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900)),
-                                  InkWell(
-                                    onTap: () => _dismissAlert(a['id']),
-                                    child: Text('Dismiss', style: TextStyle(color: Colors.orange.shade700, fontSize: 12, decoration: TextDecoration.underline)),
-                                  )
-                                ],
+                        Row(
+                          children: [
+                            const Icon(LucideIcons.arrowUpRight, color: Color(0xFFBFFF07), size: 16),
+                            const SizedBox(width: 4),
+                            Text('18% vs yesterday', style: TextStyle(color: Colors.grey.shade400, fontSize: 13)),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () async {
+                                  await Navigator.push(context, MaterialPageRoute(builder: (_) => const AddProductScreen()));
+                                  _fetchDashboardData();
+                                },
+                                icon: const Icon(LucideIcons.plus, size: 18),
+                                label: const Text('Add Product', style: TextStyle(fontWeight: FontWeight.bold)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFBFFF07),
+                                  foregroundColor: Colors.black,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  elevation: 0,
+                                ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(a['message'] ?? '', style: TextStyle(color: Colors.orange.shade800, fontSize: 13)),
-                              const SizedBox(height: 4),
-                              Text(DateFormat('MMM d, yyyy - h:mm a').format(DateTime.parse(a['created_at']).toLocal()), style: TextStyle(color: Colors.orange.shade400, fontSize: 11)),
-                            ],
-                          ),
-                        )),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () => widget.onNavigate?.call(2),
+                                icon: const Icon(LucideIcons.shoppingBag, size: 18),
+                                label: const Text('View Orders', style: TextStyle(fontWeight: FontWeight.bold)),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  side: BorderSide(color: Colors.grey.shade700),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
                       ],
                     ),
                   ),
                   const SizedBox(height: 24),
-                ],
 
-                // Recent Orders
-                const Text('Recent Orders', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                if (_recentOrders.isEmpty)
-                  const Text('No recent orders')
-                else
-                  Card(
-                    color: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade200)),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _recentOrders.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
-                      itemBuilder: (context, index) {
-                        final o = _recentOrders[index];
-                        return ListTile(
-                          title: Text(o['customer_name'] ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                          subtitle: Text('₹${o['total_amount']} • ${o['status'].toString().toUpperCase()}', style: const TextStyle(fontSize: 12)),
-                          trailing: Text(DateFormat('MMM d').format(DateTime.parse(o['created_at']).toLocal()), style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                        );
-                      }
-                    ),
+                  // Metrics Grid
+                  Row(
+                    children: [
+                      Expanded(child: _buildMetricBox('Total Orders', '$_totalOrders', 'lifetime orders', LucideIcons.shoppingCart, Colors.blue.shade50, Colors.blue)),
+                      const SizedBox(width: 16),
+                      Expanded(child: _buildMetricBox('Pending Orders', '$_pendingOrders', 'Awaiting fulfillment', LucideIcons.clock, Colors.orange.shade50, Colors.orange)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(child: _buildMetricBox('Total Products', '$_totalProducts', 'Active in store', LucideIcons.package, Colors.purple.shade50, Colors.purple)),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => widget.onNavigate?.call(3),
+                          child: _buildMetricBox('Customer Alerts', '$_alertCount', 'Need attention', LucideIcons.alertTriangle, Colors.red.shade50, Colors.red, isAlert: _alertCount > 0)
+                        )
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+
+                  // Quick Actions
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Quick Actions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('See All ➔', style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildQuickActionBtn('Products', LucideIcons.box, () => widget.onNavigate?.call(1)),
+                      _buildQuickActionBtn('Orders', LucideIcons.shoppingBag, () => widget.onNavigate?.call(2)),
+                      _buildQuickActionBtn('Coupons', LucideIcons.ticket, () => widget.onNavigate?.call(4)),
+                      _buildQuickActionBtn('Reports', LucideIcons.barChart, () {}),
+                    ],
                   )
-              ],
+                ],
+              ),
             ),
           ),
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildMetricBox(String title, String value, String subtitle, IconData icon, Color bg, Color iconColor, {bool isAlert = false}) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: 8),
-              Text(title, style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500)),
+              Text(title, style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.w500)),
+              Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: bg, shape: BoxShape.circle), child: Icon(icon, color: iconColor, size: 14)),
             ],
           ),
           const SizedBox(height: 12),
-          Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: isAlert ? Colors.red : Colors.black)),
+          const SizedBox(height: 4),
+          Text(subtitle, style: TextStyle(color: isAlert ? Colors.red.shade300 : Colors.grey.shade500, fontSize: 11)),
         ],
       ),
     );
   }
 
-  Widget _buildQuickAction(String title, IconData icon, Color color, VoidCallback onTap) {
-    return InkWell(
+  Widget _buildQuickActionBtn(String label, IconData icon, VoidCallback onTap) {
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.grey.shade200)),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(
-          children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(width: 8),
-            Expanded(child: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13))),
-          ],
-        ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+            child: Icon(icon, color: Colors.black, size: 24),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        ],
       ),
     );
   }

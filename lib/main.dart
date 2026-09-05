@@ -28,7 +28,14 @@ class SvaneyaAdminApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink, brightness: Brightness.light),
+        scaffoldBackgroundColor: const Color(0xFFF8F9FA),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF1E293B),
+          primary: const Color(0xFF1E293B),
+          secondary: const Color(0xFFBFFF07), // Neon green
+          surface: Colors.white,
+          brightness: Brightness.light,
+        ),
         textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
       ),
       home: const AuthGate(),
