@@ -23,7 +23,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   Future<void> _fetchStats() async {
     try {
       final ordersRes = await supabase.from('orders').select('total_amount');
-      final productsRes = await supabase.from('products').select('id', const FetchOptions(count: CountOption.exact));
+      final productsRes = await supabase.from('products').select('id');
       
       double revenue = 0;
       for (var o in ordersRes) {

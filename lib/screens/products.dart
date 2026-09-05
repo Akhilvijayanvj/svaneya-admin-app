@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
+import 'add_product.dart';
+
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
 
@@ -41,9 +43,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
         actions: [
           IconButton(
             icon: const Icon(LucideIcons.plus),
-            onPressed: () {
-              // TODO: Add Product Screen
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Add product coming soon')));
+            onPressed: () async {
+              final result = await Navigator.push(context, MaterialPageRoute(builder: (_) => const AddProductScreen()));
+              if (result == true) {
+                _fetchProducts(); // Refresh list if a product was added
+              }
             },
           )
         ],

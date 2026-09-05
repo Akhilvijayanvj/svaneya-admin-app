@@ -56,7 +56,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     children: [
                       Text('₹${o['total_amount']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       Container(
-                        margin: const EdgeInsets.top(4),
+                        margin: const EdgeInsets.only(top: 4),
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
                           color: o['status'] == 'paid' ? Colors.green.shade100 : Colors.orange.shade100,
@@ -74,11 +74,31 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     ],
                   ),
                   isThreeLine: true,
-                  onTap: () {},
+                  onTap: () {
+                    showDialog(context: context, builder: (_) => AlertDialog(
+                      title: const Text('Update Order Status'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(title: const Text('Pending'), onTap: () => _updateStatus(o['id'], 'pending')),
+                          ListTile(title: const Text('Paid'), onTap: () => _updateStatus(o['id'], 'paid')),
+                          ListTile(title: const Text('Shipped'), onTap: () => _updateStatus(o['id'], 'shipped')),
+                          ListTile(title: const Text('Delivered'), onTap: () => _updateStatus(o['id'], 'delivered')),
+                        ],
+                      ),
+                    ));
+                  },
                 );
               },
             ),
           ),
     );
+  }
+
+  Future<void> _updateStatus(dynamic id, String status) async {
+    Navigator.pop(context);
+    setState(() => _isLoading = true);
+    await supabase.from('orders').update({'status': status}).eq('id', id);
+    _fetchOrders();
   }
 }
