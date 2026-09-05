@@ -12,7 +12,6 @@ class MobileBannerScreen extends StatefulWidget {
 class _MobileBannerScreenState extends State<MobileBannerScreen> {
   final _urlCtrl = TextEditingController();
   bool _isLoading = true;
-  String? _bannerId;
   String? _currentUrl;
 
   @override
@@ -23,12 +22,11 @@ class _MobileBannerScreenState extends State<MobileBannerScreen> {
 
   Future<void> _fetchBanner() async {
     try {
-      final res = await supabase.from('mobile_banners').select().limit(1).maybeSingle();
+      final res = await supabase.from('store_settings').select('hero_image_1').eq('id', 'global').maybeSingle();
       if (mounted) {
         setState(() {
           if (res != null) {
-            _bannerId = res['id'];
-            _currentUrl = res['image_url'];
+            _currentUrl = res['hero_image_1'];
             _urlCtrl.text = _currentUrl ?? '';
           }
           _isLoading = false;
@@ -43,11 +41,7 @@ class _MobileBannerScreenState extends State<MobileBannerScreen> {
     if (_urlCtrl.text.isEmpty) return;
     setState(() => _isLoading = true);
     
-    if (_bannerId != null) {
-      await supabase.from('mobile_banners').update({'image_url': _urlCtrl.text}).eq('id', _bannerId!);
-    } else {
-      await supabase.from('mobile_banners').insert({'image_url': _urlCtrl.text, 'is_active': true});
-    }
+    await supabase.from('store_settings').update({'hero_image_1': _urlCtrl.text}).eq('id', 'global');
     
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Banner saved!')));
     _fetchBanner();

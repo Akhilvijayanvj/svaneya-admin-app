@@ -31,7 +31,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
     try {
       final ordersRes = await supabase.from('orders').select().order('created_at', ascending: false);
       final productsRes = await supabase.from('products').select('id');
-      final alertsRes = await supabase.from('notifications').select().eq('is_read', false).order('created_at', ascending: false);
+      final alertsRes = await supabase.from('admin_notifications').select().eq('is_read', false).order('created_at', ascending: false);
       
       double revenue = 0;
       for (var o in ordersRes) {
@@ -54,7 +54,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Future<void> _dismissAlert(String id) async {
-    await supabase.from('notifications').update({'is_read': true}).eq('id', id);
+    await supabase.from('admin_notifications').update({'is_read': true}).eq('id', id);
     _fetchDashboardData();
   }
 
