@@ -16,17 +16,15 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
   
-  final List<Widget> _screens = [
-    const OverviewScreen(),
-    const ProductsScreen(),
-    const OrdersScreen(),
-    const SettingsScreen(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: [
+        OverviewScreen(onNavigate: (idx) => setState(() => _currentIndex = idx)),
+        const ProductsScreen(),
+        const OrdersScreen(),
+        const SettingsScreen(),
+      ][_currentIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
