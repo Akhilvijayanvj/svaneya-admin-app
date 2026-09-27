@@ -29,7 +29,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
     try {
       final ordersRes = await supabase.from('orders').select();
       final productsRes = await supabase.from('products').select('id');
-      final alertsRes = await supabase.from('admin_notifications').select('id', const FetchOptions(count: CountOption.exact)).eq('is_read', false);
+      final alertsRes = await supabase.from('admin_notifications').select('id').eq('is_read', false);
       
       double revenue = 0;
       int pending = 0;
@@ -44,7 +44,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
           _totalOrders = ordersRes.length;
           _pendingOrders = pending;
           _totalProducts = productsRes.length;
-          _alertCount = alertsRes.count ?? 0;
+          _alertCount = alertsRes.length;
           _isLoading = false;
         });
       }

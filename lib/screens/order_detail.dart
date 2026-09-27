@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final dynamic orderId;
@@ -76,7 +77,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     if (_isLoading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
     if (_order == null) return const Scaffold(body: Center(child: Text('Order not found')));
 
-    final shortId = _order!['id'].toString().substring(0, 8).toUpperCase();
+    final shortId = _order!['id'].toString().substring(0, 8).toLowerCase();
     final date = DateTime.parse(_order!['created_at']).toLocal();
     final status = (_order!['status'] ?? 'pending').toString().toUpperCase();
     
@@ -87,18 +88,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     else if (status == 'DELIVERED') { statusBg = Colors.purple.shade50; statusText = Colors.purple; }
     else if (status == 'CANCELLED') { statusBg = Colors.red.shade50; statusText = Colors.red; }
 
+    Map<String, dynamic> address = {};
+    if (_order!['shipping_address'] is Map) {
+      address = _order!['shipping_address'] as Map<String, dynamic>;
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new, size: 20, color: Colors.black), onPressed: () => Navigator.pop(context)),
-        title: Text('Order #$shortId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black)),
-        centerTitle: true,
-        actions: [
-          IconButton(icon: const Icon(Icons.more_vert, color: Colors.black), onPressed: () {}),
-        ],
+        leading: IconButton(icon: const Icon(Icons.close, size: 24, color: Colors.black), onPressed: () => Navigator.pop(context)),
+        title: const Text('Order Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -108,66 +110,120 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Expanded(child: Text('Order #$shortId', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(color: statusBg, borderRadius: BorderRadius.circular(6)),
+                  decoration: BoxDecoration(color: statusBg, borderRadius: BorderRadius.circular(20)),
                   child: Text(status, style: TextStyle(color: statusText, fontSize: 11, fontWeight: FontWeight.bold)),
                 ),
-                Text(DateFormat('M/d/yyyy, h:mm a').format(date), style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: _showStatusDialog,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(color: Colors.white, border: Border.all(color: Colors.grey.shade300), borderRadius: BorderRadius.circular(8)),
+                    child: Row(
+                      children: [
+                        Text(status.toLowerCase(), style: const TextStyle(fontWeight: FontWeight.w500)),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.keyboard_arrow_down, size: 16),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(DateFormat('M/d/yyyy, h:mm:ss a').format(date), style: TextStyle(color: Colors.grey.shade500, fontSize: 14)),
+            const SizedBox(height: 4),
+            Text('Payment ID: ${_order!['payment_id'] ?? 'N/A'}', style: TextStyle(color: Colors.grey.shade500, fontSize: 14)),
+            
+            const SizedBox(height: 24),
+            
+            // Cards Row
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Customer Card
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade100)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(radius: 20, backgroundColor: Colors.blue.shade100, child: Text(_order!['customer_name'][0].toUpperCase(), style: TextStyle(color: Colors.blue.shade900, fontWeight: FontWeight.bold))),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(_order!['customer_name'] ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                  Text(_order!['customer_email'] ?? '', style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 13)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1)),
+                        Text(_order!['customer_phone'] ?? 'No phone', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () {},
+                                icon: const Icon(LucideIcons.messageCircle, size: 16, color: Colors.white),
+                                label: const Text('WhatsApp', style: TextStyle(fontSize: 13)),
+                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF25D366), foregroundColor: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(vertical: 10)),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () {},
+                                icon: const Icon(LucideIcons.phone, size: 16, color: Colors.white),
+                                label: const Text('Call', style: TextStyle(fontSize: 13)),
+                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A), foregroundColor: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), padding: const EdgeInsets.symmetric(vertical: 10)),
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Shipping Card
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade100)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Shipping Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1)),
+                        Text(address['address'] ?? 'No address', style: TextStyle(color: Colors.blueGrey.shade700, fontSize: 14, height: 1.5)),
+                        const SizedBox(height: 4),
+                        Text('${address['city'] ?? ''}, ${address['state'] ?? ''}', style: TextStyle(color: Colors.blueGrey.shade700, fontSize: 14, height: 1.5)),
+                        const SizedBox(height: 4),
+                        Text('PIN: ${address['pin'] ?? ''}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 24),
             
-            // Customer Info
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-              child: Row(
-                children: [
-                  CircleAvatar(backgroundColor: Colors.grey.shade200, child: Text(_order!['customer_name'][0].toUpperCase(), style: const TextStyle(color: Colors.black))),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(_order!['customer_name'] ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                        Text(_order!['customer_email'] ?? '', style: TextStyle(color: Colors.grey.shade500, fontSize: 13)),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade300), shape: BoxShape.circle),
-                    child: const Icon(Icons.phone, size: 16),
-                  )
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            // Shipping
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Shipping Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                  const SizedBox(height: 8),
-                  Text(_order!['customer_name'], style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
-                  const SizedBox(height: 4),
-                  Text(_order!['shipping_address'] ?? 'No address provided', style: TextStyle(color: Colors.grey.shade500, height: 1.4, fontSize: 13)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            
             // Items
-            Text('Items (${_items.length})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text('Order Items', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.blueGrey)),
             const SizedBox(height: 12),
             Container(
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
               child: ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -195,11 +251,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             children: [
                               Text(p != null ? p['name'] : 'Product', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                               const SizedBox(height: 4),
-                              Text('Qty: ${i['quantity']}', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                              Text('Qty: ${i['quantity']} × ₹${i['price']}', style: TextStyle(color: Colors.grey.shade500, fontSize: 13)),
                             ],
                           ),
                         ),
-                        Text('₹${i['price']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        Text('₹${(i['quantity'] * i['price']).toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                       ],
                     ),
                   );
@@ -209,51 +265,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             const SizedBox(height: 24),
             
             // Summary
-            const Text('Order Summary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-              child: Column(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text('Subtotal', style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
-                    Text('₹${_order!['total_amount']}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                  ]),
-                  const SizedBox(height: 12),
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text('Shipping', style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
-                    const Text('₹0', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                  ]),
-                  const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1)),
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    const Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text('₹${_order!['total_amount']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  ]),
+                  const Text('Total Amount Paid:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  Text('₹${_order!['total_amount']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
                 ],
               ),
             ),
-            const SizedBox(height: 100),
+            const SizedBox(height: 40),
           ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))]),
-        child: SafeArea(
-          child: SizedBox(
-            height: 54,
-            child: ElevatedButton(
-              onPressed: _showStatusDialog,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFBFFF07),
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(27)),
-                elevation: 0,
-              ),
-              child: const Text('Update Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            ),
-          ),
         ),
       ),
     );
