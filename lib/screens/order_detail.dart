@@ -39,6 +39,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   void _showStatusDialog() {
+    final currentStatus = (_order!['status'] ?? 'pending').toString().toLowerCase();
+    
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
@@ -52,11 +54,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             const SizedBox(height: 24),
             const Text('Update Order Status', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             const SizedBox(height: 16),
-            _buildStatusOption('pending', Colors.orange),
-            _buildStatusOption('paid', Colors.green),
-            _buildStatusOption('shipped', Colors.blue),
-            _buildStatusOption('delivered', Colors.purple),
-            _buildStatusOption('cancelled', Colors.red),
+            _buildStatusOption('pending', LucideIcons.clock, Colors.orange, currentStatus == 'pending'),
+            _buildStatusOption('paid', LucideIcons.checkCircle2, Colors.green, currentStatus == 'paid'),
+            _buildStatusOption('shipped', LucideIcons.truck, Colors.blue, currentStatus == 'shipped'),
+            _buildStatusOption('delivered', LucideIcons.packageCheck, Colors.purple, currentStatus == 'delivered'),
+            _buildStatusOption('cancelled', LucideIcons.xCircle, Colors.red, currentStatus == 'cancelled'),
             const SizedBox(height: 24),
           ],
         ),
@@ -64,19 +66,36 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     );
   }
 
-  Widget _buildStatusOption(String s, MaterialColor color) {
-    return ListTile(
-      title: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(color: color.shade50, borderRadius: BorderRadius.circular(12)),
-        child: Text(s.toUpperCase(), textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, color: color)),
-      ),
+  Widget _buildStatusOption(String s, IconData icon, MaterialColor color, bool isSelected) {
+    return InkWell(
       onTap: () async {
         Navigator.pop(context);
         setState(() => _isLoading = true);
         await supabase.from('orders').update({'status': s}).eq('id', widget.orderId);
         _fetchOrder();
       },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: isSelected ? color.shade50 : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSelected ? color.shade200 : Colors.grey.shade200),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: isSelected ? color : Colors.grey.shade600, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                s.toUpperCase(),
+                style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? color.shade700 : Colors.black87),
+              ),
+            ),
+            if (isSelected) Icon(Icons.check_circle, color: color, size: 20),
+          ],
+        ),
+      ),
     );
   }
 
