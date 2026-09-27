@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'add_product.dart';
+import 'edit_product.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -141,8 +142,51 @@ class _ProductsScreenState extends State<ProductsScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              const Icon(Icons.more_vert, color: Colors.grey, size: 20),
-                              const SizedBox(height: 16),
+                              PopupMenuButton<String>(
+                                icon: const Icon(Icons.more_vert, color: Colors.grey, size: 20),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                onSelected: (value) async {
+                                  if (value == 'edit') {
+                                    final result = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => EditProductScreen(product: p)),
+                                    );
+                                    if (result == true) _fetchProducts();
+                                  } else if (value == 'delete') {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                        title: const Text('Delete Product', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        content: Text('Are you sure you want to delete "${p['name']}"? This cannot be undone.'),
+                                        actions: [
+                                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                                          ElevatedButton(
+                                            onPressed: () => Navigator.pop(ctx, true),
+                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                                            child: const Text('Delete'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                    if (confirm == true) {
+                                      await supabase.from('products').delete().eq('id', p['id']);
+                                      _fetchProducts();
+                                    }
+                                  }
+                                },
+                                itemBuilder: (_) => [
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: Row(children: [Icon(Icons.edit_outlined, size: 18, color: Colors.black87), SizedBox(width: 10), Text('Edit Product')]),
+                                  ),
+                                  const PopupMenuItem(
+                                    value: 'delete',
+                                    child: Row(children: [Icon(Icons.delete_outline, size: 18, color: Colors.red), SizedBox(width: 10), Text('Delete', style: TextStyle(color: Colors.red))]),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
