@@ -19,6 +19,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
   late final TextEditingController _mrpCtrl;
   late final TextEditingController _stockCtrl;
   late final TextEditingController _badgeCtrl;
+  late final TextEditingController _colorHeadingCtrl;
+  final _colorInputCtrl = TextEditingController();
+
+  late bool _hasColors;
+  List<String> _selectedColors = [];
 
   // Existing image URLs from Supabase
   List<String> _existingImageUrls = [];
@@ -46,6 +51,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
     _mrpCtrl = TextEditingController(text: p['mrp']?.toString() ?? '');
     _stockCtrl = TextEditingController(text: p['stock']?.toString() ?? '');
     _badgeCtrl = TextEditingController(text: p['badge_text'] ?? '');
+    _colorHeadingCtrl = TextEditingController(text: p['color_heading'] ?? 'Color');
+    _hasColors = p['has_colors'] == true;
+    _selectedColors = List<String>.from(p['colors'] ?? []);
     _isBestSeller = p['is_best_seller'] == true;
     _isNewArrival = p['is_new_arrival'] == true;
     _isSpecialEdition = p['is_special_edition'] == true;
@@ -123,6 +131,9 @@ class _EditProductScreenState extends State<EditProductScreen> {
         'is_special_edition': _isSpecialEdition,
         'is_archived': _isArchived,
         'badge_text': _badgeCtrl.text.trim().isNotEmpty ? _badgeCtrl.text.trim() : null,
+        'has_colors': _hasColors,
+        'color_heading': _colorHeadingCtrl.text.trim(),
+        'colors': _selectedColors,
       }).eq('id', widget.product['id']);
 
       if (mounted) Navigator.pop(context, true);
@@ -300,6 +311,82 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 ),
               ),
             const SizedBox(height: 28),
+
+            // ── Colors ────────────────────────────────────────────
+            _label('Product Colors', noBottom: true),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                children: [
+                  _switchTile(
+                    LucideIcons.palette, 'Enable Colors',
+                    'Allow customers to choose colors', Colors.pink,
+                    _hasColors, (v) => setState(() => _hasColors = v),
+                    divider: _hasColors,
+                  ),
+                  if (_hasColors) ...[
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _label('Color Section Heading'),
+                          Text('e.g. "Color of the stone" instead of just "Color"', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                          const SizedBox(height: 8),
+                          _field(_colorHeadingCtrl, 'Color'),
+                          const SizedBox(height: 16),
+                          _label('Add Colors'),
+                          Row(
+                            children: [
+                              Expanded(child: _field(_colorInputCtrl, 'e.g. Red, Blue, Gold...')),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed: () {
+                                  final val = _colorInputCtrl.text.trim();
+                                  if (val.isNotEmpty && !_selectedColors.contains(val)) {
+                                    setState(() {
+                                      _selectedColors.add(val);
+                                      _colorInputCtrl.clear();
+                                    });
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF1E293B),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                ),
+                                child: const Text('Add'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _selectedColors.map((c) => Chip(
+                              label: Text(c, style: const TextStyle(fontWeight: FontWeight.w600)),
+                              backgroundColor: Colors.grey.shade100,
+                              side: BorderSide(color: Colors.grey.shade300),
+                              deleteIcon: const Icon(Icons.close, size: 16),
+                              onDeleted: () {
+                                setState(() => _selectedColors.remove(c));
+                              },
+                            )).toList(),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
 
             // ── Flags ─────────────────────────────────────────────
             _label('Product Labels', noBottom: true),

@@ -18,9 +18,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _mrpCtrl = TextEditingController();
   final _stockCtrl = TextEditingController();
   final _badgeCtrl = TextEditingController();
+  final _colorHeadingCtrl = TextEditingController(text: 'Color');
+  final _colorInputCtrl = TextEditingController();
 
   final List<XFile> _selectedImages = [];
+  final List<String> _selectedColors = [];
   final _imagePicker = ImagePicker();
+
+  bool _hasColors = false;
 
   bool _isBestSeller = false;
   bool _isNewArrival = false;
@@ -116,6 +121,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
         'is_special_edition': _isSpecialEdition,
         'is_archived': _isArchived,
         'badge_text': _badgeCtrl.text.trim().isNotEmpty ? _badgeCtrl.text.trim() : null,
+        'has_colors': _hasColors,
+        'color_heading': _colorHeadingCtrl.text.trim(),
+        'colors': _selectedColors,
       });
 
       if (mounted) Navigator.pop(context, true);
@@ -301,6 +309,82 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 ),
               ),
             const SizedBox(height: 28),
+
+            // ── Colors ────────────────────────────────────────────
+            _label('Product Colors', noBottom: true),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                children: [
+                  _switchTile(
+                    LucideIcons.palette, 'Enable Colors',
+                    'Allow customers to choose colors', Colors.pink,
+                    _hasColors, (v) => setState(() => _hasColors = v),
+                    divider: _hasColors,
+                  ),
+                  if (_hasColors) ...[
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _label('Color Section Heading'),
+                          Text('e.g. "Color of the stone" instead of just "Color"', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                          const SizedBox(height: 8),
+                          _field(_colorHeadingCtrl, 'Color'),
+                          const SizedBox(height: 16),
+                          _label('Add Colors'),
+                          Row(
+                            children: [
+                              Expanded(child: _field(_colorInputCtrl, 'e.g. Red, Blue, Gold...')),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed: () {
+                                  final val = _colorInputCtrl.text.trim();
+                                  if (val.isNotEmpty && !_selectedColors.contains(val)) {
+                                    setState(() {
+                                      _selectedColors.add(val);
+                                      _colorInputCtrl.clear();
+                                    });
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF1E293B),
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                ),
+                                child: const Text('Add'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _selectedColors.map((c) => Chip(
+                              label: Text(c, style: const TextStyle(fontWeight: FontWeight.w600)),
+                              backgroundColor: Colors.grey.shade100,
+                              side: BorderSide(color: Colors.grey.shade300),
+                              deleteIcon: const Icon(Icons.close, size: 16),
+                              onDeleted: () {
+                                setState(() => _selectedColors.remove(c));
+                              },
+                            )).toList(),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
 
             // ── Product Flags ─────────────────────────────────────
             _label('Product Labels', noBottom: true),
