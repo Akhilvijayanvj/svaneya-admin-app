@@ -170,45 +170,41 @@ class _OverviewScreenState extends State<OverviewScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Metrics Scroll
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    clipBehavior: Clip.none,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 160,
-                          child: GestureDetector(
-                            onTap: () => widget.onNavigateToOrders?.call('All') ?? widget.onNavigate?.call(2), // Orders tab
-                            child: _buildMetricBox('Total Orders', '$_totalOrders', 'lifetime orders', LucideIcons.shoppingCart, Colors.blue.shade50, Colors.blue)
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        SizedBox(
-                          width: 160,
-                          child: GestureDetector(
-                            onTap: () => widget.onNavigateToOrders?.call('Pending') ?? widget.onNavigate?.call(2), // Orders tab (Filtered to Pending)
-                            child: _buildMetricBox('Pending Orders', '$_pendingOrders', 'Awaiting fulfillment', LucideIcons.clock, Colors.orange.shade50, Colors.orange)
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        SizedBox(
-                          width: 160,
-                          child: GestureDetector(
-                            onTap: () => widget.onNavigate?.call(1), // Products tab
-                            child: _buildMetricBox('Total Products', '$_totalProducts', 'Active in store', LucideIcons.package, Colors.purple.shade50, Colors.purple)
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        SizedBox(
-                          width: 160,
-                          child: GestureDetector(
-                            onTap: () => widget.onNavigate?.call(3),
-                            child: _buildMetricBox('Customer Alerts', '$_alertCount', 'Need attention', LucideIcons.alertTriangle, Colors.red.shade50, Colors.red, isAlert: _alertCount > 0)
-                          ),
-                        ),
-                      ],
-                    ),
+                  // Metrics Grid
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => widget.onNavigateToOrders?.call('All') ?? widget.onNavigate?.call(2),
+                          child: _buildMetricBox('Total Orders', '$_totalOrders', 'lifetime orders', LucideIcons.shoppingCart, Colors.blue.shade50, Colors.blue)
+                        )
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => widget.onNavigateToOrders?.call('Pending') ?? widget.onNavigate?.call(2),
+                          child: _buildMetricBox('Pending Orders', '$_pendingOrders', 'Awaiting fulfillment', LucideIcons.clock, Colors.orange.shade50, Colors.orange)
+                        )
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => widget.onNavigate?.call(1),
+                          child: _buildMetricBox('Total Products', '$_totalProducts', 'Active in store', LucideIcons.package, Colors.purple.shade50, Colors.purple)
+                        )
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => widget.onNavigate?.call(3),
+                          child: _buildMetricBox('Customer Alerts', '$_alertCount', 'Need attention', LucideIcons.alertTriangle, Colors.red.shade50, Colors.red, isAlert: _alertCount > 0)
+                        )
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 32),
 
@@ -243,22 +239,22 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
   Widget _buildMetricBox(String title, String value, String subtitle, IconData icon, Color bg, Color iconColor, {bool isAlert = false}) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(title, style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.w500)),
-              Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: bg, shape: BoxShape.circle), child: Icon(icon, color: iconColor, size: 14)),
+              Text(title, style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.w600)),
+              Container(padding: const EdgeInsets.all(4), decoration: BoxDecoration(color: bg, shape: BoxShape.circle), child: Icon(icon, color: iconColor, size: 12)),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: isAlert ? Colors.red : Colors.black)),
-          const SizedBox(height: 4),
-          Text(subtitle, style: TextStyle(color: isAlert ? Colors.red.shade300 : Colors.grey.shade500, fontSize: 11)),
+          const SizedBox(height: 8),
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: isAlert ? Colors.red : Colors.black)),
+          const SizedBox(height: 2),
+          Text(subtitle, style: TextStyle(color: isAlert ? Colors.red.shade300 : Colors.grey.shade500, fontSize: 10)),
         ],
       ),
     );
