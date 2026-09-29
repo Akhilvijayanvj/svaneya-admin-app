@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'add_product.dart';
+import 'categories.dart';
 
 class OverviewScreen extends StatefulWidget {
   final Function(int)? onNavigate;
@@ -198,7 +199,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                       _buildQuickActionBtn('Products', LucideIcons.box, () => widget.onNavigate?.call(1)),
                       _buildQuickActionBtn('Orders', LucideIcons.shoppingBag, () => widget.onNavigate?.call(2)),
                       _buildQuickActionBtn('Coupons', LucideIcons.ticket, () => widget.onNavigate?.call(4)),
-                      _buildQuickActionBtn('Reports', LucideIcons.barChart, () {}),
+                      _buildQuickActionBtn('Categories', LucideIcons.listTree, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoriesScreen()))),
                     ],
                   )
                 ],
