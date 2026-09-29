@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'promo_codes.dart';
 import 'mobile_banner.dart';
 import 'notifications.dart';
+import 'categories.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -51,6 +52,8 @@ class SettingsScreen extends StatelessWidget {
               decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
               child: Column(
                 children: [
+                  _buildListItem(LucideIcons.listTree, 'Categories', 'Manage product categories', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoriesScreen()))),
+                  const Divider(height: 1, indent: 56),
                   _buildListItem(LucideIcons.image, 'Mobile Banner', 'Update the app homepage banner', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MobileBannerScreen()))),
                   const Divider(height: 1, indent: 56),
                   _buildListItem(LucideIcons.ticket, 'Coupons', 'Create and manage promo codes', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PromoCodesScreen()))),
