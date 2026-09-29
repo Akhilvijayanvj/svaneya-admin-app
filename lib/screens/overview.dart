@@ -116,12 +116,25 @@ class _OverviewScreenState extends State<OverviewScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          // TODO: Implement theme toggle
+                          if (themeNotifier.value == ThemeMode.light) {
+                            themeNotifier.value = ThemeMode.dark;
+                          } else {
+                            themeNotifier.value = ThemeMode.light;
+                          }
                         },
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade300)),
-                          child: const Icon(LucideIcons.moon, size: 20),
+                        child: ValueListenableBuilder<ThemeMode>(
+                          valueListenable: themeNotifier,
+                          builder: (context, mode, _) {
+                            final isDark = mode == ThemeMode.dark;
+                            return Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle, 
+                                border: Border.all(color: isDark ? Colors.grey.shade800 : Colors.grey.shade300)
+                              ),
+                              child: Icon(isDark ? LucideIcons.sun : LucideIcons.moon, size: 20),
+                            );
+                          }
                         ),
                       )
                     ],

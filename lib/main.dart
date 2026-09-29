@@ -18,27 +18,60 @@ void main() async {
   runApp(const SvaneyaAdminApp());
 }
 
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+
 class SvaneyaAdminApp extends StatelessWidget {
   const SvaneyaAdminApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Svaneya Admin',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF8F9FA),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1E293B),
-          primary: const Color(0xFF1E293B),
-          secondary: const Color(0xFFBFFF07), // Neon green
-          surface: Colors.white,
-          brightness: Brightness.light,
-        ),
-        textTheme: GoogleFonts.interTextTheme(Theme.of(context).textTheme),
-      ),
-      home: const AuthGate(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (_, currentMode, __) {
+        return MaterialApp(
+          title: 'Svaneya Admin',
+          debugShowCheckedModeBanner: false,
+          themeMode: currentMode,
+          theme: ThemeData(
+            useMaterial3: true,
+            scaffoldBackgroundColor: const Color(0xFFF8F9FA),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF1E293B),
+              primary: const Color(0xFF1E293B),
+              secondary: const Color(0xFFBFFF07),
+              surface: Colors.white,
+              brightness: Brightness.light,
+            ),
+            textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              iconTheme: IconThemeData(color: Colors.black),
+              titleTextStyle: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            scaffoldBackgroundColor: const Color(0xFF121212),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFFBFFF07),
+              primary: const Color(0xFFBFFF07),
+              secondary: const Color(0xFF1E293B),
+              surface: const Color(0xFF1E1E1E),
+              brightness: Brightness.dark,
+            ),
+            textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              iconTheme: IconThemeData(color: Colors.white),
+              titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            cardColor: const Color(0xFF1E1E1E),
+          ),
+          home: const AuthGate(),
+        );
+      }
     );
   }
 }
