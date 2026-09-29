@@ -256,13 +256,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
                     runSpacing: 24,
                     alignment: WrapAlignment.start,
                     children: [
-                      SizedBox(width: 75, child: _buildQuickActionBtn('Products', LucideIcons.box, () => widget.onNavigate?.call(1))),
-                      SizedBox(width: 75, child: _buildQuickActionBtn('Orders', LucideIcons.shoppingBag, () => widget.onNavigate?.call(2))),
-                      SizedBox(width: 75, child: _buildQuickActionBtn('Categories', LucideIcons.listTree, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoriesScreen())))),
-                      SizedBox(width: 75, child: _buildQuickActionBtn('Coupons', LucideIcons.ticket, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PromoCodesScreen())))),
-                      SizedBox(width: 75, child: _buildQuickActionBtn('Web Banners', LucideIcons.globe, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WebBannerScreen())))),
-                      SizedBox(width: 75, child: _buildQuickActionBtn('App Banners', LucideIcons.smartphone, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MobileBannerScreen())))),
-                      SizedBox(width: 75, child: _buildQuickActionBtn('Alerts', LucideIcons.bellRing, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())))),
+                      SizedBox(width: 82, child: _buildQuickActionBtn('Products', LucideIcons.box, () => widget.onNavigate?.call(1))),
+                      SizedBox(width: 82, child: _buildQuickActionBtn('Orders', LucideIcons.shoppingBag, () => widget.onNavigate?.call(2))),
+                      SizedBox(width: 82, child: _buildQuickActionBtn('Categories', LucideIcons.listTree, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoriesScreen())))),
+                      SizedBox(width: 82, child: _buildQuickActionBtn('Coupons', LucideIcons.ticket, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PromoCodesScreen())))),
+                      SizedBox(width: 82, child: _buildQuickActionBtn('Web Banners', LucideIcons.globe, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WebBannerScreen())))),
+                      SizedBox(width: 82, child: _buildQuickActionBtn('App Banners', LucideIcons.smartphone, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MobileBannerScreen())))),
+                      SizedBox(width: 82, child: _buildQuickActionBtn('Alerts', LucideIcons.bellRing, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())))),
                     ],
                   )
                 ],
@@ -306,7 +306,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
             child: Icon(icon, color: Colors.black, size: 24),
           ),
           const SizedBox(height: 8),
-          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+          Text(
+            label, 
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)
+          ),
         ],
       ),
     );
