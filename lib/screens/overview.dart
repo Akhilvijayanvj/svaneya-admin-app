@@ -8,7 +8,8 @@ import 'promo_codes.dart';
 
 class OverviewScreen extends StatefulWidget {
   final Function(int)? onNavigate;
-  const OverviewScreen({super.key, this.onNavigate});
+  final Function(String)? onNavigateToOrders;
+  const OverviewScreen({super.key, this.onNavigate, this.onNavigateToOrders});
 
   @override
   State<OverviewScreen> createState() => _OverviewScreenState();
@@ -171,14 +172,14 @@ class _OverviewScreenState extends State<OverviewScreen> {
                     children: [
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => widget.onNavigate?.call(2), // Orders tab
+                          onTap: () => widget.onNavigateToOrders?.call('All') ?? widget.onNavigate?.call(2), // Orders tab
                           child: _buildMetricBox('Total Orders', '$_totalOrders', 'lifetime orders', LucideIcons.shoppingCart, Colors.blue.shade50, Colors.blue)
                         )
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => widget.onNavigate?.call(2), // Orders tab
+                          onTap: () => widget.onNavigateToOrders?.call('Pending') ?? widget.onNavigate?.call(2), // Orders tab (Filtered to Pending)
                           child: _buildMetricBox('Pending Orders', '$_pendingOrders', 'Awaiting fulfillment', LucideIcons.clock, Colors.orange.shade50, Colors.orange)
                         )
                       ),

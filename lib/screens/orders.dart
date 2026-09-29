@@ -5,7 +5,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'order_detail.dart';
 
 class OrdersScreen extends StatefulWidget {
-  const OrdersScreen({super.key});
+  final String? initialFilter;
+  const OrdersScreen({super.key, this.initialFilter});
 
   @override
   State<OrdersScreen> createState() => _OrdersScreenState();
@@ -19,7 +20,16 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   void initState() {
     super.initState();
+    _filter = widget.initialFilter ?? 'All';
     _fetchOrders();
+  }
+
+  @override
+  void didUpdateWidget(covariant OrdersScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialFilter != oldWidget.initialFilter && widget.initialFilter != null) {
+      setState(() => _filter = widget.initialFilter!);
+    }
   }
 
   Future<void> _fetchOrders() async {

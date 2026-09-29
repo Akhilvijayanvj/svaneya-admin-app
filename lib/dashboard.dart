@@ -16,15 +16,22 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
+  String? _ordersFilter;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: [
-        OverviewScreen(onNavigate: (idx) => setState(() => _currentIndex = idx)),
+        OverviewScreen(
+          onNavigate: (idx) => setState(() => _currentIndex = idx),
+          onNavigateToOrders: (filter) => setState(() {
+            _ordersFilter = filter;
+            _currentIndex = 2;
+          }),
+        ),
         const ProductsScreen(),
-        const OrdersScreen(),
+        OrdersScreen(initialFilter: _ordersFilter),
         const AlertsScreen(),
         const SettingsScreen(),
       ][_currentIndex],
