@@ -3,6 +3,8 @@ import '../main.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'add_product.dart';
 import 'categories.dart';
+import 'notifications.dart';
+import 'promo_codes.dart';
 
 class OverviewScreen extends StatefulWidget {
   final Function(int)? onNavigate;
@@ -83,10 +85,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
                           ],
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade300)),
-                        child: const Icon(LucideIcons.bell, size: 20),
+                      GestureDetector(
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade300)),
+                          child: const Icon(LucideIcons.bell, size: 20),
+                        ),
                       )
                     ],
                   ),
@@ -164,15 +169,30 @@ class _OverviewScreenState extends State<OverviewScreen> {
                   // Metrics Grid
                   Row(
                     children: [
-                      Expanded(child: _buildMetricBox('Total Orders', '$_totalOrders', 'lifetime orders', LucideIcons.shoppingCart, Colors.blue.shade50, Colors.blue)),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => widget.onNavigate?.call(2), // Orders tab
+                          child: _buildMetricBox('Total Orders', '$_totalOrders', 'lifetime orders', LucideIcons.shoppingCart, Colors.blue.shade50, Colors.blue)
+                        )
+                      ),
                       const SizedBox(width: 16),
-                      Expanded(child: _buildMetricBox('Pending Orders', '$_pendingOrders', 'Awaiting fulfillment', LucideIcons.clock, Colors.orange.shade50, Colors.orange)),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => widget.onNavigate?.call(2), // Orders tab
+                          child: _buildMetricBox('Pending Orders', '$_pendingOrders', 'Awaiting fulfillment', LucideIcons.clock, Colors.orange.shade50, Colors.orange)
+                        )
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Expanded(child: _buildMetricBox('Total Products', '$_totalProducts', 'Active in store', LucideIcons.package, Colors.purple.shade50, Colors.purple)),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => widget.onNavigate?.call(1), // Products tab
+                          child: _buildMetricBox('Total Products', '$_totalProducts', 'Active in store', LucideIcons.package, Colors.purple.shade50, Colors.purple)
+                        )
+                      ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: GestureDetector(
@@ -198,7 +218,7 @@ class _OverviewScreenState extends State<OverviewScreen> {
                     children: [
                       _buildQuickActionBtn('Products', LucideIcons.box, () => widget.onNavigate?.call(1)),
                       _buildQuickActionBtn('Orders', LucideIcons.shoppingBag, () => widget.onNavigate?.call(2)),
-                      _buildQuickActionBtn('Coupons', LucideIcons.ticket, () => widget.onNavigate?.call(4)),
+                      _buildQuickActionBtn('Coupons', LucideIcons.ticket, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PromoCodesScreen()))),
                       _buildQuickActionBtn('Categories', LucideIcons.listTree, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoriesScreen()))),
                     ],
                   )
