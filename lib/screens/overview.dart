@@ -18,7 +18,8 @@ class OverviewScreen extends StatefulWidget {
 
 class _OverviewScreenState extends State<OverviewScreen> {
   bool _isLoading = true;
-  double _totalRevenue = 0;
+  double _todayRevenue = 0;
+  double _revenueGrowth = 0;
   int _totalOrders = 0;
   int _pendingOrders = 0;
   int _totalProducts = 0;
@@ -36,16 +37,41 @@ class _OverviewScreenState extends State<OverviewScreen> {
       final productsRes = await supabase.from('products').select('id');
       final alertsRes = await supabase.from('admin_notifications').select('id').eq('is_read', false);
       
-      double revenue = 0;
+      double todayRev = 0;
+      double yesterdayRev = 0;
       int pending = 0;
+
+      final now = DateTime.now();
+      final todayStart = DateTime(now.year, now.month, now.day);
+      final yesterdayStart = todayStart.subtract(const Duration(days: 1));
+
       for (var o in ordersRes) {
-        revenue += (o['total_amount'] as num).toDouble();
         if (o['status'] == 'pending') pending++;
+        
+        final createdAtStr = o['created_at'];
+        if (createdAtStr != null) {
+          final createdAt = DateTime.parse(createdAtStr).toLocal();
+          final amount = (o['total_amount'] as num).toDouble();
+          
+          if (createdAt.isAfter(todayStart) || createdAt.isAtSameMomentAs(todayStart)) {
+            todayRev += amount;
+          } else if (createdAt.isAfter(yesterdayStart) && createdAt.isBefore(todayStart)) {
+            yesterdayRev += amount;
+          }
+        }
+      }
+      
+      double growth = 0;
+      if (yesterdayRev > 0) {
+        growth = ((todayRev - yesterdayRev) / yesterdayRev) * 100;
+      } else if (todayRev > 0) {
+        growth = 100;
       }
       
       if (mounted) {
         setState(() {
-          _totalRevenue = revenue;
+          _todayRevenue = todayRev;
+          _revenueGrowth = growth;
           _totalOrders = ordersRes.length;
           _pendingOrders = pending;
           _totalProducts = productsRes.length;
@@ -120,13 +146,20 @@ class _OverviewScreenState extends State<OverviewScreen> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Text('₹${_totalRevenue.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                        Text('₹${_todayRevenue.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            const Icon(LucideIcons.arrowUpRight, color: Color(0xFFBFFF07), size: 16),
+                            Icon(
+                              _revenueGrowth >= 0 ? LucideIcons.arrowUpRight : LucideIcons.arrowDownRight, 
+                              color: _revenueGrowth >= 0 ? const Color(0xFFBFFF07) : Colors.redAccent, 
+                              size: 16
+                            ),
                             const SizedBox(width: 4),
-                            Text('18% vs yesterday', style: TextStyle(color: Colors.grey.shade400, fontSize: 13)),
+                            Text(
+                              '${_revenueGrowth.abs().toStringAsFixed(1)}% vs yesterday', 
+                              style: TextStyle(color: Colors.grey.shade400, fontSize: 13)
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),
