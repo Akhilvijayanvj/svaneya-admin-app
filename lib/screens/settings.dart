@@ -47,22 +47,8 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Main Settings
-            Container(
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-              child: Column(
-                children: [
-                  _buildListItem(LucideIcons.listTree, 'Categories', 'Manage product categories', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoriesScreen()))),
-                  const Divider(height: 1, indent: 56),
-                  _buildListItem(LucideIcons.image, 'Mobile Banner', 'Update the app homepage banner', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MobileBannerScreen()))),
-                  const Divider(height: 1, indent: 56),
-                  _buildListItem(LucideIcons.ticket, 'Coupons', 'Create and manage promo codes', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PromoCodesScreen()))),
-                  const Divider(height: 1, indent: 56),
-                  _buildListItem(LucideIcons.bell, 'Notifications', 'Send push alerts to mobile users', () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()))),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
+            // Removed Main Settings (Moved to Dashboard Quick Actions)
+
 
             // System Settings
             Container(

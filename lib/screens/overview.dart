@@ -5,6 +5,7 @@ import 'add_product.dart';
 import 'categories.dart';
 import 'notifications.dart';
 import 'promo_codes.dart';
+import 'mobile_banner.dart';
 
 class OverviewScreen extends StatefulWidget {
   final Function(int)? onNavigate;
@@ -87,11 +88,13 @@ class _OverviewScreenState extends State<OverviewScreen> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())),
+                        onTap: () {
+                          // TODO: Implement theme toggle
+                        },
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.grey.shade300)),
-                          child: const Icon(LucideIcons.bell, size: 20),
+                          child: const Icon(LucideIcons.moon, size: 20),
                         ),
                       )
                     ],
@@ -167,41 +170,45 @@ class _OverviewScreenState extends State<OverviewScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Metrics Grid
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => widget.onNavigateToOrders?.call('All') ?? widget.onNavigate?.call(2), // Orders tab
-                          child: _buildMetricBox('Total Orders', '$_totalOrders', 'lifetime orders', LucideIcons.shoppingCart, Colors.blue.shade50, Colors.blue)
-                        )
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => widget.onNavigateToOrders?.call('Pending') ?? widget.onNavigate?.call(2), // Orders tab (Filtered to Pending)
-                          child: _buildMetricBox('Pending Orders', '$_pendingOrders', 'Awaiting fulfillment', LucideIcons.clock, Colors.orange.shade50, Colors.orange)
-                        )
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => widget.onNavigate?.call(1), // Products tab
-                          child: _buildMetricBox('Total Products', '$_totalProducts', 'Active in store', LucideIcons.package, Colors.purple.shade50, Colors.purple)
-                        )
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => widget.onNavigate?.call(3),
-                          child: _buildMetricBox('Customer Alerts', '$_alertCount', 'Need attention', LucideIcons.alertTriangle, Colors.red.shade50, Colors.red, isAlert: _alertCount > 0)
-                        )
-                      ),
-                    ],
+                  // Metrics Scroll
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    clipBehavior: Clip.none,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 160,
+                          child: GestureDetector(
+                            onTap: () => widget.onNavigateToOrders?.call('All') ?? widget.onNavigate?.call(2), // Orders tab
+                            child: _buildMetricBox('Total Orders', '$_totalOrders', 'lifetime orders', LucideIcons.shoppingCart, Colors.blue.shade50, Colors.blue)
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        SizedBox(
+                          width: 160,
+                          child: GestureDetector(
+                            onTap: () => widget.onNavigateToOrders?.call('Pending') ?? widget.onNavigate?.call(2), // Orders tab (Filtered to Pending)
+                            child: _buildMetricBox('Pending Orders', '$_pendingOrders', 'Awaiting fulfillment', LucideIcons.clock, Colors.orange.shade50, Colors.orange)
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        SizedBox(
+                          width: 160,
+                          child: GestureDetector(
+                            onTap: () => widget.onNavigate?.call(1), // Products tab
+                            child: _buildMetricBox('Total Products', '$_totalProducts', 'Active in store', LucideIcons.package, Colors.purple.shade50, Colors.purple)
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        SizedBox(
+                          width: 160,
+                          child: GestureDetector(
+                            onTap: () => widget.onNavigate?.call(3),
+                            child: _buildMetricBox('Customer Alerts', '$_alertCount', 'Need attention', LucideIcons.alertTriangle, Colors.red.shade50, Colors.red, isAlert: _alertCount > 0)
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 32),
 
@@ -214,13 +221,17 @@ class _OverviewScreenState extends State<OverviewScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 24,
+                    alignment: WrapAlignment.start,
                     children: [
-                      _buildQuickActionBtn('Products', LucideIcons.box, () => widget.onNavigate?.call(1)),
-                      _buildQuickActionBtn('Orders', LucideIcons.shoppingBag, () => widget.onNavigate?.call(2)),
-                      _buildQuickActionBtn('Coupons', LucideIcons.ticket, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PromoCodesScreen()))),
-                      _buildQuickActionBtn('Categories', LucideIcons.listTree, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoriesScreen()))),
+                      SizedBox(width: 75, child: _buildQuickActionBtn('Products', LucideIcons.box, () => widget.onNavigate?.call(1))),
+                      SizedBox(width: 75, child: _buildQuickActionBtn('Orders', LucideIcons.shoppingBag, () => widget.onNavigate?.call(2))),
+                      SizedBox(width: 75, child: _buildQuickActionBtn('Categories', LucideIcons.listTree, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoriesScreen())))),
+                      SizedBox(width: 75, child: _buildQuickActionBtn('Coupons', LucideIcons.ticket, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PromoCodesScreen())))),
+                      SizedBox(width: 75, child: _buildQuickActionBtn('Banners', LucideIcons.image, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MobileBannerScreen())))),
+                      SizedBox(width: 75, child: _buildQuickActionBtn('Alerts', LucideIcons.bellRing, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())))),
                     ],
                   )
                 ],
