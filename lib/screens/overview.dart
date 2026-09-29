@@ -251,19 +251,26 @@ class _OverviewScreenState extends State<OverviewScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 16,
-                    runSpacing: 24,
-                    alignment: WrapAlignment.start,
-                    children: [
-                      SizedBox(width: 82, child: _buildQuickActionBtn('Products', LucideIcons.box, () => widget.onNavigate?.call(1))),
-                      SizedBox(width: 82, child: _buildQuickActionBtn('Orders', LucideIcons.shoppingBag, () => widget.onNavigate?.call(2))),
-                      SizedBox(width: 82, child: _buildQuickActionBtn('Categories', LucideIcons.listTree, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoriesScreen())))),
-                      SizedBox(width: 82, child: _buildQuickActionBtn('Coupons', LucideIcons.ticket, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PromoCodesScreen())))),
-                      SizedBox(width: 82, child: _buildQuickActionBtn('Web Banners', LucideIcons.globe, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WebBannerScreen())))),
-                      SizedBox(width: 82, child: _buildQuickActionBtn('App Banners', LucideIcons.smartphone, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MobileBannerScreen())))),
-                      SizedBox(width: 82, child: _buildQuickActionBtn('Alerts', LucideIcons.bellRing, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())))),
-                    ],
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final spacing = 8.0;
+                      // Subtract spacing for 3 gaps, then divide by 4 exactly
+                      final itemWidth = (constraints.maxWidth - (spacing * 3)) / 4.001; 
+                      return Wrap(
+                        spacing: spacing,
+                        runSpacing: 24,
+                        alignment: WrapAlignment.start,
+                        children: [
+                          SizedBox(width: itemWidth, child: _buildQuickActionBtn('Products', LucideIcons.box, () => widget.onNavigate?.call(1))),
+                          SizedBox(width: itemWidth, child: _buildQuickActionBtn('Orders', LucideIcons.shoppingBag, () => widget.onNavigate?.call(2))),
+                          SizedBox(width: itemWidth, child: _buildQuickActionBtn('Categories', LucideIcons.listTree, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoriesScreen())))),
+                          SizedBox(width: itemWidth, child: _buildQuickActionBtn('Coupons', LucideIcons.ticket, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PromoCodesScreen())))),
+                          SizedBox(width: itemWidth, child: _buildQuickActionBtn('Web Banners', LucideIcons.globe, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WebBannerScreen())))),
+                          SizedBox(width: itemWidth, child: _buildQuickActionBtn('App Banners', LucideIcons.smartphone, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MobileBannerScreen())))),
+                          SizedBox(width: itemWidth, child: _buildQuickActionBtn('Alerts', LucideIcons.bellRing, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())))),
+                        ],
+                      );
+                    }
                   )
                 ],
               ),
