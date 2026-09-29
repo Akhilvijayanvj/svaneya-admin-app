@@ -6,6 +6,7 @@ import 'categories.dart';
 import 'notifications.dart';
 import 'promo_codes.dart';
 import 'mobile_banner.dart';
+import 'web_banner.dart';
 
 class OverviewScreen extends StatefulWidget {
   final Function(int)? onNavigate;
@@ -259,7 +260,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
                       SizedBox(width: 75, child: _buildQuickActionBtn('Orders', LucideIcons.shoppingBag, () => widget.onNavigate?.call(2))),
                       SizedBox(width: 75, child: _buildQuickActionBtn('Categories', LucideIcons.listTree, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoriesScreen())))),
                       SizedBox(width: 75, child: _buildQuickActionBtn('Coupons', LucideIcons.ticket, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PromoCodesScreen())))),
-                      SizedBox(width: 75, child: _buildQuickActionBtn('Banners', LucideIcons.image, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MobileBannerScreen())))),
+                      SizedBox(width: 75, child: _buildQuickActionBtn('Web Banners', LucideIcons.globe, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WebBannerScreen())))),
+                      SizedBox(width: 75, child: _buildQuickActionBtn('App Banners', LucideIcons.smartphone, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MobileBannerScreen())))),
                       SizedBox(width: 75, child: _buildQuickActionBtn('Alerts', LucideIcons.bellRing, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen())))),
                     ],
                   )
