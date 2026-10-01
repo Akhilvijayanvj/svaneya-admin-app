@@ -87,8 +87,10 @@ class _OverviewScreenState extends State<OverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Colors.transparent, // Let dashboard scaffold handle background
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator())
         : RefreshIndicator(
@@ -109,8 +111,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Hi, Admin 👋', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                            Text('Svaneya Store', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                            Text('Hi, Admin 👋', style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
+                            Text('Svaneya Store', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 13)),
                           ],
                         ),
                       ),
@@ -259,8 +261,8 @@ class _OverviewScreenState extends State<OverviewScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Quick Actions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text('See All ➔', style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontWeight: FontWeight.w600)),
+                      Text('Quick Actions', style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text('See All ➔', style: TextStyle(fontSize: 13, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontWeight: FontWeight.w600)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -293,9 +295,15 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Widget _buildMetricBox(String title, String value, String subtitle, IconData icon, Color bg, Color iconColor, {bool isAlert = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white, 
+        borderRadius: BorderRadius.circular(16), 
+        border: Border.all(color: isDark ? Colors.grey.shade800 : Colors.grey.shade200)
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -303,11 +311,11 @@ class _OverviewScreenState extends State<OverviewScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(title, style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.w600)),
-              Container(padding: const EdgeInsets.all(4), decoration: BoxDecoration(color: bg, shape: BoxShape.circle), child: Icon(icon, color: iconColor, size: 12)),
+              Container(padding: const EdgeInsets.all(4), decoration: BoxDecoration(color: isDark ? bg.withOpacity(0.1) : bg, shape: BoxShape.circle), child: Icon(icon, color: iconColor, size: 12)),
             ],
           ),
           const SizedBox(height: 8),
-          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: isAlert ? Colors.red : Colors.black)),
+          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: isAlert ? Colors.red : (isDark ? Colors.white : Colors.black))),
           const SizedBox(height: 2),
           Text(subtitle, style: TextStyle(color: isAlert ? Colors.red.shade300 : Colors.grey.shade500, fontSize: 10)),
         ],
@@ -316,20 +324,30 @@ class _OverviewScreenState extends State<OverviewScreen> {
   }
 
   Widget _buildQuickActionBtn(String label, IconData icon, VoidCallback onTap) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return GestureDetector(
       onTap: onTap,
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-            child: Icon(icon, color: Colors.black, size: 24),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E1E1E) : Colors.white, 
+              shape: BoxShape.circle,
+              border: Border.all(color: isDark ? Colors.grey.shade800 : Colors.transparent)
+            ),
+            child: Icon(icon, color: isDark ? Colors.white : Colors.black, size: 24),
           ),
           const SizedBox(height: 8),
           Text(
             label, 
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)
+            style: TextStyle(
+              color: isDark ? Colors.grey.shade300 : Colors.black87,
+              fontSize: 12, 
+              fontWeight: FontWeight.w500
+            )
           ),
         ],
       ),

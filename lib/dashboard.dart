@@ -20,8 +20,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: [
         OverviewScreen(
           onNavigate: (idx) => setState(() => _currentIndex = idx),
@@ -37,8 +39,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ][_currentIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))],
+          color: Theme.of(context).colorScheme.surface,
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.05), blurRadius: 10, offset: const Offset(0, -5))],
         ),
         child: SafeArea(
           child: Padding(
@@ -61,27 +63,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildNavItem(int index, IconData icon, String label, {bool badge = false}) {
     final isSelected = _currentIndex == index;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(horizontal: isSelected ? 16 : 12, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF1E293B) : Colors.transparent,
+          color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
           children: [
             Stack(
               children: [
-                Icon(icon, color: isSelected ? const Color(0xFFBFFF07) : Colors.grey.shade500, size: 22),
+                Icon(
+                  icon, 
+                  color: isSelected ? Theme.of(context).colorScheme.secondary : (isDark ? Colors.grey.shade400 : Colors.grey.shade500), 
+                  size: 22
+                ),
                 if (badge && !isSelected)
                   Positioned(right: 0, top: 0, child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle))),
               ],
             ),
             if (isSelected) ...[
               const SizedBox(width: 6),
-              Text(label, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+              Text(
+                label, 
+                style: TextStyle(
+                  color: isDark ? const Color(0xFF1E1E1E) : Colors.white, 
+                  fontSize: 13, 
+                  fontWeight: FontWeight.w600
+                )
+              ),
             ]
           ],
         ),
